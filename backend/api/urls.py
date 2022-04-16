@@ -8,9 +8,9 @@ from .views import (IngredientViewSet,
                     UserViewSet)
 
 router = DefaultRouter()
-router.register(r'users/subscriptions', SubscriptionViewSet,
+router.register('users/subscriptions', SubscriptionViewSet,
                 basename='subscription')
-router.register(r'users', UserViewSet)
+router.register(r'users', UserViewSet, basename='user')
 router.register(r'tags', TagViewSet)
 router.register(r'recipes', RecipeViewSet, basename='recipe')
 router.register(r'ingredients', IngredientViewSet)

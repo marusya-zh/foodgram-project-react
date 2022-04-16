@@ -6,13 +6,10 @@ from .models import (Favorite, Ingredient, Recipe, RecipeIngredientAmount,
 
 class TagAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
         'name',
-        'color',
         'slug',
     )
     list_display_links = (
-        'id',
         'name',
     )
     prepopulated_fields = {'slug': ('name',)}

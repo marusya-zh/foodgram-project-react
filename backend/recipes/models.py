@@ -27,7 +27,7 @@ class Tag(models.Model):
         verbose_name_plural = 'Теги'
 
     def __str__(self):
-        return self.name
+        return f'{self.name} {self.slug}'
 
 
 class Ingredient(models.Model):
@@ -118,6 +118,7 @@ class RecipeIngredientAmount(models.Model):
     recipe = models.ForeignKey(
         Recipe,
         on_delete=models.CASCADE,
+        related_name='recipeingredientamount',
         verbose_name='Рецепт'
     )
     ingredient = models.ForeignKey(

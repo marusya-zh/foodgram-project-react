@@ -108,8 +108,9 @@ class UserViewSet(ListCreateRetrieveViewSet):
                     }
                 )
 
-            subscription = Subscription.objects.create(user=user,
-                                                       author=author)
+            subscription, _ = Subscription.objects.get_or_create(
+                user=user, author=author
+            )
             serializer = SubscriptionSerializer(
                 subscription,
                 context={'request': request}
@@ -117,14 +118,11 @@ class UserViewSet(ListCreateRetrieveViewSet):
             return Response(serializer.data,
                             status=status.HTTP_201_CREATED)
 
-        try:
-            subscription = user.subscriptions.get(author_id=pk)
-        except Subscription.DoesNotExist:
-            response = {"errors": 'Автор не найден в подписках.'}
-            return Response(response, status=status.HTTP_400_BAD_REQUEST)
-
-        subscription.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        if request.method == 'DELETE':
+            if user.subscriptions.filter(author_id=pk).delete()[0] == 0:
+                response = {"errors": 'Автор не найден в подписках.'}
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class SubscriptionViewSet(ListViewSet):
@@ -182,10 +180,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = Recipe.objects
 
-        is_favorited_filter = self.request.query_params.get(
-            'is_favorited',
-            None
-        )
+        is_favorited_filter = self.request.query_params.get('is_favorited')
         if is_favorited_filter == '1':
             user = self.request.user
             if user.is_authenticated:
@@ -195,8 +190,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 return queryset.filter(pk__in=favorite_pks)
 
         is_in_shopping_cart = self.request.query_params.get(
-            'is_in_shopping_cart',
-            None
+            'is_in_shopping_cart'
         )
         if is_in_shopping_cart == '1':
             user = self.request.user
@@ -299,6 +293,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'ingredient__name', 'ingredient__measurement_unit'
         ).annotate(amount=Sum('amount'))
 
+        return self.get_pdf(shopping_cart)
+
+    def get_pdf(self, shopping_cart):
         buffer = io.BytesIO()
         p = canvas.Canvas(buffer)
 
