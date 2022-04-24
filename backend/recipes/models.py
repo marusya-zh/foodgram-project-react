@@ -60,6 +60,22 @@ class Ingredient(models.Model):
         return self.name
 
 
+class RecipeQuerySet(models.QuerySet):
+    def favorited_shoppingcart(self, user):
+        return self.annotate(
+            is_favorited=models.Exists(
+                Favorite.objects.filter(
+                    user=user, recipe_id=models.OuterRef('pk')
+                )
+            ),
+            is_in_shopping_cart=models.Exists(
+                ShoppingCart.objects.filter(
+                    user=user, recipe_id=models.OuterRef('pk')
+                )
+            )
+        )
+
+
 class Recipe(models.Model):
     """
     Модель рецепта.
@@ -88,7 +104,7 @@ class Recipe(models.Model):
         verbose_name='Название'
     )
     image = models.ImageField(
-        upload_to='recipes/',
+        upload_to='recipes/images/',
         verbose_name='Изображение'
     )
     text = models.TextField(
@@ -101,6 +117,13 @@ class Recipe(models.Model):
         verbose_name='Время приготовления',
         help_text='В минутах'
     )
+    objects = models.Manager()
+    marked = RecipeQuerySet.as_manager()
+
+    @property
+    def added_to_favorites(self):
+        return Favorite.objects.filter(recipe=self.id).count()
+    added_to_favorites.fget.short_description = 'Число добавлений в избранное'
 
     class Meta:
         ordering = ('-pub_date',)
@@ -197,13 +220,6 @@ class FavoriteShoppingCartBaseModel(models.Model):
     class Meta:
         abstract = True
 
-        constraints = [
-            models.UniqueConstraint(
-                fields=['user', 'recipe'],
-                name='unique_user_recipe'
-            ),
-        ]
-
     def __str__(self):
         return f'{self.user} {self.recipe}'
 
@@ -216,6 +232,13 @@ class Favorite(FavoriteShoppingCartBaseModel):
         verbose_name = 'Избранное'
         verbose_name_plural = 'Избранное'
 
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_favorite'
+            ),
+        ]
+
 
 class ShoppingCart(FavoriteShoppingCartBaseModel):
     """
@@ -224,3 +247,10 @@ class ShoppingCart(FavoriteShoppingCartBaseModel):
     class Meta(FavoriteShoppingCartBaseModel.Meta):
         verbose_name = 'Список покупок'
         verbose_name_plural = 'Список покупок'
+
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_shoppingcart'
+            ),
+        ]

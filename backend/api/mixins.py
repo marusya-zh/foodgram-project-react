@@ -8,16 +8,6 @@ class ListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     pass
 
 
-class ListCreateRetrieveViewSet(mixins.ListModelMixin,
-                                mixins.CreateModelMixin,
-                                mixins.RetrieveModelMixin,
-                                viewsets.GenericViewSet):
-    """
-    Вьюсет позволяет вернуть список объектов, создать объект, вернуть объект.
-    """
-    pass
-
-
 class ListRetrieveViewSet(mixins.ListModelMixin,
                           mixins.RetrieveModelMixin,
                           viewsets.GenericViewSet):

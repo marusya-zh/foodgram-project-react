@@ -7,6 +7,24 @@ services:
       dockerfile: Dockerfile
     volumes:
       - ../frontend/:/app/result_build/
+  db:
+    image: postgres:13.0-alpine
+    volumes:
+      - /var/lib/postgresql/data/
+    depends_on:
+      - frontend
+    env_file:
+      - ./.env
+  web:
+    image: zhuchina/foodgram_backend
+    restart: always
+    volumes:
+      - djangostatic_value:/app/djangostatic
+      - media_value:/app/media/
+    depends_on:
+      - db
+    env_file:
+      - ./.env
   nginx:
     image: nginx:1.19.3
     ports:
@@ -15,3 +33,11 @@ services:
       - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - ../frontend/build:/usr/share/nginx/html/
       - ../docs/:/usr/share/nginx/html/api/docs/
+      - djangostatic_value:/var/html/djangostatic/
+      - media_value:/var/html/media/
+    depends_on:
+      - web
+
+volumes:
+  djangostatic_value:
+  media_value:

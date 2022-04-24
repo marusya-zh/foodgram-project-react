@@ -17,12 +17,10 @@ class TagAdmin(admin.ModelAdmin):
 
 class IngredientAdmin(admin.ModelAdmin):
     list_display = (
-        'id',
         'name',
         'measurement_unit',
     )
     list_display_links = (
-        'id',
         'name',
     )
     list_filter = ('name',)
@@ -43,6 +41,8 @@ class RecipeIngredientAmountAdmin(admin.ModelAdmin):
 
 
 class RecipeAdmin(admin.ModelAdmin):
+    model = Recipe
+    readonly_fields = ('added_to_favorites',)
     list_display = (
         'name',
         'author',

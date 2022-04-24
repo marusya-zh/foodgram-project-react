@@ -27,7 +27,9 @@ class UserReadSerializer(serializers.ModelSerializer):
                   'last_name', 'is_subscribed')
 
     def get_is_subscribed(self, obj):
-        return False
+        user = self.context['request'].user
+        return (user.is_authenticated
+                and user.subscriptions.filter(author=obj).exists())
 
 
 class UserWriteSerializer(serializers.ModelSerializer):
@@ -42,27 +44,10 @@ class UserWriteSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def create(self, validated_data):
-        for user in User.objects.all():
-            if user.check_password(validated_data['password']):
-                raise serializers.ValidationError(
-                    {
-                        "password": [
-                            "Пользователь с таким паролем уже существует."
-                        ]
-                    }
-                )
         user = super().create(validated_data)
         user.set_password(validated_data['password'])
         user.save()
         return user
-
-
-class PasswordSerializer(serializers.Serializer):
-    """
-    Сериализатор пароля.
-    """
-    new_password = serializers.CharField(max_length=150, required=True)
-    current_password = serializers.CharField(max_length=150, required=True)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -134,15 +119,23 @@ class RecipeSerializer(serializers.ModelSerializer):
                   'is_favorited', 'is_in_shopping_cart',
                   'name', 'image', 'text', 'cooking_time')
 
+    def to_representation(self, instance):
+        response = super().to_representation(instance)
+        if instance.image:
+            response['image'] = instance.image.url
+        return response
+
     def get_is_favorited(self, obj):
         user = self.context['request'].user
-        return (user.is_authenticated and
-                Favorite.objects.filter(user=user, recipe=obj).exists())
+        return (user.is_authenticated
+                and Favorite.objects.filter(user=user, recipe=obj).exists())
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context['request'].user
-        return (user.is_authenticated and
-                ShoppingCart.objects.filter(user=user, recipe=obj).exists())
+        return (
+            user.is_authenticated
+            and ShoppingCart.objects.filter(user=user, recipe=obj).exists()
+        )
 
 
 class Base64ImageField(serializers.ImageField):
@@ -269,8 +262,10 @@ class SubscriptionSerializer(serializers.ModelSerializer):
     def get_is_subscribed(self, obj):
         user = self.context['request'].user
         author = obj.author
-        return (user.is_authenticated and
-                Subscription.objects.filter(user=user, author=author).exists())
+        return (
+            user.is_authenticated
+            and Subscription.objects.filter(user=user, author=author).exists()
+        )
 
     def get_recipes(self, obj):
         query_params = self.context['request'].query_params
