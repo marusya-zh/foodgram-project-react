@@ -1,3 +1,5 @@
+[![foodgram workflow](https://github.com/marusya-zh/foodgram-project-react/actions/workflows/foodgram_workflow.yml/badge.svg)](https://github.com/marusya-zh/foodgram-project-react/actions/workflows/foodgram_workflow.yml)
+
 # Продуктовый помощник Foodgram
 
 ### Описание
