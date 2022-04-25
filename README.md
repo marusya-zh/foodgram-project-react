@@ -55,7 +55,12 @@ sudo docker-compose exec web python manage.py collectstatic --no-input
 sudo docker-compose exec web python manage.py loaddata fixtures.json
 ```  
 
-Локально приложение доступно по адресу [http://localhost/](http://localhost/).
+Локально приложение доступно по адресу [http://localhost/](http://localhost/).  
+Развёрнутый и запущенный проект на удалённом сервере доступен по ссылке [http://178.154.207.124/](http://178.154.207.124/).  
+Логин и пароль администратора: ```admin```, ```111!!!qqq```.
+
+### Документация приложения
+Документация API Foodgram подключена по адресу [http://178.154.207.124/api/docs/](http://178.154.207.124/api/docs/) и содержит описание возможных запросов к API и структуру ожидаемых ответов.
 
 ### Автор
 Mariya Zhuchina
