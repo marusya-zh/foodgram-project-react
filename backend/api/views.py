@@ -135,12 +135,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return RecipeSerializer
         return RecipeWriteSerializer
 
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)
-
-    def perform_update(self, serializer):
-        serializer.save(author=self.request.user)
-
     def partial_update(self, request, *args, **kwargs):
         kwargs['partial'] = False
         return self.update(request, *args, **kwargs)
@@ -152,6 +146,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = request.user
         model = apps.get_model(app_label='recipes', model_name=model)
 
+        # В соответствии со спецификацией возвращаем 201, 400, 401.
         try:
             recipe = Recipe.objects.get(pk=pk)
         except Recipe.DoesNotExist:

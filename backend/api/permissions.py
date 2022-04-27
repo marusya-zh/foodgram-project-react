@@ -1,11 +1,13 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
 
 
+# Если не определяем, AnonymousUser имеет доступ к POST.
 class ReadOnlyPermission(BasePermission):
     def has_permission(self, request, view):
         return request.method in SAFE_METHODS
 
 
+# Если не определяем, любой авторизованный имеет доступ к PATCH и DEL.
 class ReadOnly(ReadOnlyPermission):
     """
     Безопасные запросы доступны любому пользователю.

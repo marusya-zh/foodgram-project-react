@@ -177,11 +177,14 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         queryset=Tag.objects.all()
     )
     image = Base64ImageField(max_length=None, use_url=True)
+    author = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
 
     class Meta:
         model = Recipe
         fields = ('ingredients', 'tags', 'image',
-                  'name', 'text', 'cooking_time')
+                  'name', 'text', 'cooking_time', 'author')
 
     def create(self, validated_data):
         ingredients_data = validated_data.pop('ingredients')
